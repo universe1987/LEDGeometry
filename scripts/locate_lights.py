@@ -1,56 +1,32 @@
+import argparse
 import cv2
 import numpy as np
+import os
 from sklearn.cluster import KMeans
 
 
-def convert_to_grayscale(src_path, dst_path):
-    img = cv2.imread(src_path, 0)
-    cv2.imwrite(dst_path, img)
+def _extract_marks(img, n_points, rgb='r'):
+    channel = {'r': 2, 'g': 1, 'b': 0}[rgb]
+    img_diff = img[:, :, channel] - img.mean(axis=2)
+    y, x = np.where(img_diff > 32)
+    height, width = img_diff.shape
+    y = y.astype(float) / height
+    x = x.astype(float) / width
+    km = KMeans(n_clusters=n_points).fit(np.vstack([x, y]).T)
+    return [tuple(p) for p in km.cluster_centers_]
 
 
-def extract_marks(src_path, dst_path):
-    """
-    Assuming the marks are green and the background is gray, so the green channel stands out.
-    """
-    img = cv2.imread(src_path).astype(int)
-    img_diff = img[:, :, 1] - img[:, :, 0]
-    img_diff[img_diff > 32] = 255
-    cv2.imwrite(dst_path, img_diff)
-
-
-def locate_centers(src_path, n_lights):
-    """
-    Identify the center of the white dots from a black and white image using k-means.
-    """
-    img = cv2.imread(src_path, 0)
-    y, x = np.where(img == 255)
-    y = y.astype(float) / img.shape[0]
-    x = x.astype(float) / img.shape[1]
-    km = KMeans(n_clusters=n_lights).fit(np.vstack([x, y]).T)
-    centers = km.cluster_centers_
-    centers -= centers.mean(axis=0)
-    max_r = np.sqrt(centers[:, 0] ** 2 + centers[:, 1] ** 2).max()
-    # scale and shrink to fit in unit circle
-    centers /= max_r
-    return centers
-
-
-def connect_the_dots(centers, start, is_left_half):
-    """
-    Map the index to coordinates, this assumes that the curve is symmetric to y-axis, and for each half of the curve,
-    two dots are closest if and only if they are adjacent.
-    """
-    result = [start]
-    for i in range(len(centers) // 2 - 1):
+def _parameterize_smooth_curve(img_path, n_points):
+    img = cv2.imread(img_path).astype(int)
+    start_point = _extract_marks(img, n_points=1, rgb='r')[0]
+    points = _extract_marks(img, n_points=n_points-1, rgb='g')
+    result = [start_point]
+    for i in range(len(points)):
         cx, cy = result[-1]
         neighbor = None
         min_dist = 1
         chosen = set(result)
-        for x, y in centers:
-            if is_left_half and x > 0.02:
-                continue
-            if not is_left_half and x < -0.02:
-                continue
+        for x, y in points:
             if (x, y) in chosen:
                 continue
             dist = (x - cx) ** 2 + (y - cy) ** 2
@@ -60,47 +36,72 @@ def connect_the_dots(centers, start, is_left_half):
         result.append(neighbor)
     return result
 
+class LEDLocator:
+    def __init__(self):
+        self.source_image = None
+        self.grayscale_images = []
+        self.coordinates = None
+    
+    def convert_to_grayscale(self, src_path, n_copies=1):
+        src_tokens = os.path.basename(src_path).split('.')
+        dst_dir = os.path.dirname(src_path)
+        img = cv2.imread(src_path, 0)
+        for i in range(n_copies):
+            dst_name = '.'.join(src_tokens[:-1]) + '_gs{}.'.format(i) + src_tokens[-1]
+            dst_path = os.path.join(dst_dir, dst_name)
+            if os.path.exists(dst_path):
+                print('file {} already exists, will not overwrite'.format(dst_path))
+            else:
+                cv2.imwrite(dst_path, img)
+            self.grayscale_images.append(dst_path)
 
-def sort_centers(centers, render=False):
-    left_start, right_start = None, None
-    for x, y in centers:
-        if -0.03 < x < 0 and y < -0.3:
-            print(x, y)
-            left_start = x, y
-        if 0 < x < 0.07 and y < -0.3:
-            print(x, y)
-            right_start = x, y
-    left_half = connect_the_dots(centers, left_start, True)
-    right_half = connect_the_dots(centers, right_start, False)
-    result = left_half + right_half[::-1]
-    x_coords = [a[0] for a in result]
-    y_coords = [-a[1] for a in result]
+    def parameterize(self, points_per_curve):
+        result = []
+        for i, fn in enumerate(self.grayscale_images):
+            curve = _parameterize_smooth_curve(fn, n_points=points_per_curve[i])
+            result.extend(curve)
+        result = np.array(result)
+        result -= result.mean(axis=0)
+        max_r = np.sqrt(result[:, 0] ** 2 + result[:, 1] ** 2).max()
+        # scale and shrink to fit in unit circle
+        result /= max_r
+        self.coordinates = result
+        x_coords = self.coordinates[:, 0]
+        y_coords = self.coordinates[:, 1]
+        self._generate_code()
 
-    if render:
+    def render(self):
         import matplotlib.pyplot as plt
-        plt.plot(x_coords, y_coords)
-        plt.scatter([left_start[0], right_start[0]], [-left_start[1], -right_start[1]])
+        x_coords = self.coordinates[:, 0]
+        y_coords = self.coordinates[:, 1]
+        plt.plot(x_coords, -1 * y_coords)
         plt.show()
-    return x_coords, y_coords
+
+    def _generate_code(self):
+        x_coords = [int(round(x * 10000)) for x in self.coordinates[:, 0]]
+        y_coords = [int(round(y * 10000)) for y in self.coordinates[:, 1]]
+        s = str(x_coords).replace('[', '{').replace(']', '}')
+        print('int16_t x_coords[{}] = {};'.format(len(x_coords), s))
+        s = str(y_coords).replace('[', '{').replace(']', '}')
+        print('int16_t y_coords[{}] = {};'.format(len(x_coords), s))
 
 
-def parametrize_leds():
-    centers = list(list(x) for x in locate_centers('imgs/marks.jpg', 60))
-    x_coords, y_coords = sort_centers(centers, True)
-    x_coords = [int(round(x * 10000)) for x in x_coords]
-    y_coords = [int(round(y * 10000)) for y in y_coords]
-    s = str(x_coords).replace('[', '{').replace(']', '}')
-    print('int16_t x_coords[60] = {};'.format(s))
-    s = str(y_coords).replace('[', '{').replace(']', '}')
-    print('int16_t y_coords[60] = {};'.format(s))
+def main():
+    locator = LEDLocator()
+    img_path = 'figure_three.jpg'
+    locator.convert_to_grayscale(img_path, n_copies=2)
+    points_per_curve = input('Please mark each gray scale image, then enter the number of dots separated by comma:\n')
+    points_per_curve = [int(x.strip()) for x in points_per_curve.split(',')]
+    locator.parameterize(points_per_curve)
+    locator.render()
 
 
 if __name__ == '__main__':
-    # Step 0. take a photo of your light when the lights are on and save it to 'imgs/blue_heart.jpg'
+    # Step 0. take a photo of your light when the lights are on and save it.
     # Step 1. uncomment and run the following line to convert the photo to grayscale
     # convert_to_grayscale('imgs/blue_heart.jpg', 'imgs/gray.jpg')
     # Step 2. after manually mark the LEDs with green dots, for example, using Windows' paint, uncomment and run
     # the following line to extract your marks into a black and white image
     # extract_marks('imgs/gray.jpg', 'imgs/marks.jpg')
     # Step 3. run the following command and paste the output to the Arduino IDE.
-    parametrize_leds()
+    main()
