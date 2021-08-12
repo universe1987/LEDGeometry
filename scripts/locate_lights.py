@@ -55,13 +55,17 @@ class LEDLocator:
                 cv2.imwrite(dst_path, img)
             self.grayscale_images.append(dst_path)
 
-    def parameterize(self, points_per_curve):
+    def parameterize(self, points_per_curve, reversed=False):
         result = []
         for i, fn in enumerate(self.grayscale_images):
             curve = _parameterize_smooth_curve(fn, n_points=points_per_curve[i])
             result.extend(curve)
+        if reversed:
+            result = result[::-1]
         result = np.array(result)
+        print(result)
         result -= result.mean(axis=0)
+        print(result)
         max_r = np.sqrt(result[:, 0] ** 2 + result[:, 1] ** 2).max()
         # scale and shrink to fit in unit circle
         result /= max_r
@@ -92,7 +96,7 @@ def main():
     locator.convert_to_grayscale(img_path, n_copies=2)
     points_per_curve = input('Please mark each gray scale image, then enter the number of dots separated by comma:\n')
     points_per_curve = [int(x.strip()) for x in points_per_curve.split(',')]
-    locator.parameterize(points_per_curve)
+    locator.parameterize(points_per_curve, reversed=True)
     locator.render()
 
 

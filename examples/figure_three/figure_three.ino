@@ -19,7 +19,7 @@
 #define BRIGHTNESS  144
 
 #define COLOR_BUFFER_SIZE 32
-#define RESOLUTION 38
+#define RESOLUTION 50
 
 using namespace LEDGeometry;
 
@@ -71,6 +71,6 @@ void loop() {
   parallel_projection((Shape*)&figure_three, byte_buffer, COLOR_BUFFER_SIZE);
   my_light.set_effect((LightEffect*)&tide, 20, duration);
   // 6. Flame effect 30 fps for 30s.
-  parallel_projection((Shape*)&figure_three, byte_buffer + RESOLUTION, RESOLUTION, 1.0, 0.0);
+  parallel_projection((Shape*)&figure_three, byte_buffer + RESOLUTION, RESOLUTION, 0.0, 1.0);
   my_light.set_effect((LightEffect*)&flame, 30, duration);
 }
