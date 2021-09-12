@@ -19,6 +19,7 @@ def _extract_marks(img, n_points, rgb='r'):
 def _parameterize_smooth_curve(img_path, n_points):
     img = cv2.imread(img_path).astype(int)
     start_point = _extract_marks(img, n_points=1, rgb='r')[0]
+    print(start_point)
     points = _extract_marks(img, n_points=n_points-1, rgb='g')
     result = [start_point]
     for i in range(len(points)):
@@ -35,6 +36,7 @@ def _parameterize_smooth_curve(img_path, n_points):
                 neighbor = x, y
         result.append(neighbor)
     return result
+
 
 class LEDLocator:
     def __init__(self):
@@ -60,10 +62,10 @@ class LEDLocator:
         for i, fn in enumerate(self.grayscale_images):
             curve = _parameterize_smooth_curve(fn, n_points=points_per_curve[i])
             result.extend(curve)
+        print(result)
         if reversed:
             result = result[::-1]
         result = np.array(result)
-        print(result)
         result -= result.mean(axis=0)
         print(result)
         max_r = np.sqrt(result[:, 0] ** 2 + result[:, 1] ** 2).max()
@@ -92,7 +94,7 @@ class LEDLocator:
 
 def main():
     locator = LEDLocator()
-    img_path = 'figure_three.jpg'
+    img_path = 'heart.jpg'
     locator.convert_to_grayscale(img_path, n_copies=2)
     points_per_curve = input('Please mark each gray scale image, then enter the number of dots separated by comma:\n')
     points_per_curve = [int(x.strip()) for x in points_per_curve.split(',')]
