@@ -12,7 +12,8 @@ FlameEffect::FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection,
       resolution(resolution),
       projection(projection),
       cooling(cooling),
-      sparking(sparking) {
+      sparking(sparking),
+      haunt_mode(0) {
     for (int i = 0; i < resolution; i++) {
         heat[i] = 0;
     }
@@ -21,6 +22,10 @@ FlameEffect::FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection,
 FlameEffect::FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection)
     : FlameEffect(heat, resolution, projection,
                   (uint8_t)((550 / resolution) + 2), 120) {}
+
+void FlameEffect::set_random_haunt_mode() {
+    set_haunt_mode(random8() % 2 + 1);
+}
 
 void FlameEffect::update_heat() {
     // randomly cool down
@@ -40,10 +45,18 @@ void FlameEffect::update_heat() {
 }
 
 void FlameEffect::update(LEDCurve* led_curve) {
+    CRGBPalette16 palette = HeatColors_p;
+    if (led_curve->get_progress() >= 64) {
+        if (haunt_mode == 1) {
+            palette = CRGBPalette16( CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
+        } else if (haunt_mode == 2) {
+            palette = CRGBPalette16( CRGB::Black, CRGB::Green, CRGB::Aqua, CRGB::White);
+        }
+    }
     for (int i = 0; i < led_curve->shape->n_points(); i++) {
         uint8_t temperature = heat[projection[i]];
         uint8_t color_index = scale8(temperature, 240);
-        led_curve->leds[i] = ColorFromPalette(HeatColors_p, color_index);
+        led_curve->leds[i] = ColorFromPalette(palette, color_index);
     }
     update_heat();
 }

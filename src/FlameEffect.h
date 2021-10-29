@@ -12,6 +12,8 @@ class FlameEffect : public LightEffect {
     FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection);
     FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection,
                 uint8_t cooling, uint8_t sparking);
+    void set_haunt_mode(uint8_t new_mode) { haunt_mode = new_mode; }
+    void set_random_haunt_mode(uint8_t new_mode);
 
    protected:
     void update(LEDCurve* led_curve);
@@ -23,5 +25,6 @@ class FlameEffect : public LightEffect {
     uint8_t* projection;
     uint8_t cooling;
     uint8_t sparking;
+    uint8_t haunt_mode;
 };
 }  // namespace LEDGeometry
