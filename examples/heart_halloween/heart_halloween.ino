@@ -76,7 +76,7 @@ void loop() {
 //  color_scheduler.set_cycle(NUM_LEDS / 4);
 //  my_light.set_effect((LightEffect*)&spiral, 15, duration);
   // 7. Flame effect 30 fps for 30s.
-  color_scheduler.set_cycle(900);
+  color_scheduler.set_cycle(450);
   intrinsic_projection((Shape*)&heart_shape, byte_buffer + RESOLUTION, RESOLUTION);
   flame.set_random_haunt_mode();
   my_light.set_effect((LightEffect*)&flame, 30, duration);
