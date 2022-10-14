@@ -13,7 +13,14 @@ LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
     : leds(leds),
       shape(shape),
       color_scheduler(color_scheduler),
-      folded(folded){};
+      folded(folded),
+      blackout(nullptr),
+      n_blackouts(0){};
+
+void LEDCurve::set_blackout(uint8_t n_blackouts, uint8_t* blackout) {
+    this->n_blackouts = n_blackouts;
+    this->blackout = blackout;
+}
 
 void LEDCurve::display(int sleep_ms) {
     if (folded) {
@@ -21,6 +28,9 @@ void LEDCurve::display(int sleep_ms) {
         for (int i = 0; i < n; i++) {
             leds[n + i] = leds[n - i - 1];
         }
+    }
+    for (int i = 0; i < n_blackouts; i++) {
+        leds[i] = CRGB::Black;
     }
     FastLED.show();
     FastLED.delay(sleep_ms);

@@ -37,12 +37,13 @@ int16_t y_coords[120] = {3784, 3623, 4177, 3817, 3745, 4520, 4735, 4017, 4695, 5
 CustomShape pumpkin_shape = CustomShape(NUM_LEDS, x_coords, y_coords);
 // Color changes every 100 frames, this can be modified by calling set_cycle.
 ColorScheduler color_scheduler = ColorScheduler(100);
-LEDCurve my_light(leds, (Shape*)&pumpkin_shape, &color_scheduler, true);
+LEDCurve my_light(leds, (Shape*)&pumpkin_shape, &color_scheduler, false);
+uint8_t blackout[5] = {74, 75, 76, 77, 96};
+my_light.set_blackout(5, &blackout);
 
 MonoColorEffect mono;
 SignalTransmissionEffect transmission;
 PulseEffect pulse;
-SpiralEffect spiral(2, NUM_LEDS / 4);
 FlameEffect flame(byte_buffer, RESOLUTION, byte_buffer + RESOLUTION);
 WaveEffect ripple(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
 WaveEffect tide(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
