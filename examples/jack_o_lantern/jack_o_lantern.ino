@@ -37,7 +37,7 @@ int16_t y_coords[120] = {3784, 3623, 4177, 3817, 3745, 4520, 4735, 4017, 4695, 5
 CustomShape pumpkin_shape = CustomShape(NUM_LEDS, x_coords, y_coords);
 // Color changes every 100 frames, this can be modified by calling set_cycle.
 ColorScheduler color_scheduler = ColorScheduler(100);
-LEDCurve my_light(leds, (Shape*)&heart_shape, &color_scheduler, true);
+LEDCurve my_light(leds, (Shape*)&pumpkin_shape, &color_scheduler, true);
 
 MonoColorEffect mono;
 SignalTransmissionEffect transmission;
@@ -61,17 +61,17 @@ void loop() {
   color_scheduler.set_continuous_mode();
   my_light.set_effect((LightEffect*)&mono, 10, duration);
   // 2. Ripple effect 20fps for 30s, center is randomly chosen.
-  radial_projection((Shape*)&heart_shape, byte_buffer, COLOR_BUFFER_SIZE);
+  radial_projection((Shape*)&pumpkin_shape, byte_buffer, COLOR_BUFFER_SIZE);
   my_light.set_effect((LightEffect*)&ripple, 20, duration);
   // 3. Pulse effect 16fps for 30s.
   color_scheduler.set_cycle(120);
   my_light.set_effect((LightEffect*)&pulse, 16, duration);
   // 4. Tide effect 20fps for 30s, projection direction is randomly chosen.
-  parallel_projection((Shape*)&heart_shape, byte_buffer, COLOR_BUFFER_SIZE);
+  parallel_projection((Shape*)&pumpkin_shape, byte_buffer, COLOR_BUFFER_SIZE);
   my_light.set_effect((LightEffect*)&tide, 20, duration);
   // 5. Flame effect 30 fps for 30s.
   color_scheduler.set_cycle(450);
-  intrinsic_projection((Shape*)&heart_shape, byte_buffer + RESOLUTION, RESOLUTION);
+  intrinsic_projection((Shape*)&pumpkin_shape, byte_buffer + RESOLUTION, RESOLUTION);
   flame.set_random_haunt_mode();
   my_light.set_effect((LightEffect*)&flame, 30, duration);
 }
