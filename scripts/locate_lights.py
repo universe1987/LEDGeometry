@@ -23,51 +23,48 @@ def _locate_marks(img, n_marks, rgb='r'):
     return [tuple(p) for p in km.cluster_centers_]
 
 
-def _parameterize_smooth_curve(img_path, n_points):
+def _sort_marks(img_path, n_marks):
     img = cv2.imread(img_path).astype(int)
     start_point = _locate_marks(img, n_marks=1, rgb='r')[0]
-    print(start_point)
-    points = _locate_marks(img, n_marks=n_points-1, rgb='g')
+    points = _locate_marks(img, n_marks=n_marks-1, rgb='g')
     result = [start_point]
-    for i in range(len(points)):
-        cx, cy = result[-1]
+    remaining = set(points)
+    while remaining:
+        prev_x, prev_y = result[-1]
         neighbor = None
-        min_dist = 1
-        chosen = set(result)
-        for x, y in points:
-            if (x, y) in chosen:
-                continue
-            dist = (x - cx) ** 2 + (y - cy) ** 2
+        min_dist = 2
+        for x, y in remaining:
+            dist = (x - prev_x) ** 2 + (y - prev_y) ** 2
             if min_dist > dist:
                 min_dist = dist
                 neighbor = x, y
         result.append(neighbor)
+        remaining -= {neighbor}
     return result
 
 
 class LEDLocator:
-    def __init__(self):
-        self.source_image = None
+    def __init__(self, theme):
+        self.theme = theme
+        self.source_image = os.path.join(theme, f'{theme}.jpg')
         self.grayscale_images = []
         self.coordinates = None
 
-    def convert_to_grayscale(self, src_path, n_copies=1):
-        src_file_name, src_extension = os.path.basename(src_path).rsplit('.', 1)
-        dst_dir = os.path.dirname(src_path)
-        img = cv2.imread(src_path, 0)
+    def convert_to_grayscale(self, n_copies=1):
+        img = cv2.imread(self.source_image, 0)
         for i in range(n_copies):
-            dst_name = f'{src_file_name}_gs{i}.{src_extension}'
-            dst_path = os.path.join(dst_dir, dst_name)
+            dst_name = f'{self.theme}_gs{i}.jpg'
+            dst_path = os.path.join(self.theme, dst_name)
             if os.path.exists(dst_path):
                 print('file {} already exists, will not overwrite'.format(dst_path))
             else:
                 cv2.imwrite(dst_path, img)
             self.grayscale_images.append(dst_path)
 
-    def parameterize(self, points_per_curve, reversed=False):
+    def locate_lights(self, num_marks, reversed=False):
         result = []
         for i, fn in enumerate(self.grayscale_images):
-            curve = _parameterize_smooth_curve(fn, n_points=points_per_curve[i])
+            curve = _sort_marks(fn, n_marks=num_marks[i])
             result.extend(curve)
         if reversed:
             result = result[::-1]
@@ -77,7 +74,6 @@ class LEDLocator:
         # scale and shrink to fit in unit circle
         result /= max_r
         self.coordinates = result
-        self._generate_code()
 
     def render(self):
         x_coords = [255 + int(255*x) for x in self.coordinates[:, 0]]
@@ -94,30 +90,61 @@ class LEDLocator:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def _generate_code(self):
+    def generate_code(self):
+        dst = os.path.join('..', 'examples', f'{self.theme}', f'{self.theme}.ino')
+        if os.path.exists(dst):
+            print(f'{dst} already exists, will not overwrite')
+            return
         x_coords = [int(round(x * 10000)) for x in self.coordinates[:, 0]]
         y_coords = [int(round(y * 10000)) for y in self.coordinates[:, 1]]
+        with open('template.ino', 'r') as fp:
+            content = fp.read()
         s = str(x_coords).replace('[', '{').replace(']', '}')
-        print('int16_t x_coords[{}] = {};'.format(len(x_coords), s))
+        x_coords_line = f'int16_t x_coords[{len(x_coords)}] = {s};'
+        content = content.replace('{{x_coords}}', x_coords_line)
         s = str(y_coords).replace('[', '{').replace(']', '}')
-        print('int16_t y_coords[{}] = {};'.format(len(x_coords), s))
+        y_coords_line = f'int16_t y_coords[{len(x_coords)}] = {s};'
+        content = content.replace('{{y_coords}}', y_coords_line)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        with open(dst, 'w') as fp:
+            fp.write(content)
 
 
-def process_image(image_name, n_segments, reversed):
-    locator = LEDLocator()
+def mark_lights(locator, theme_name):
+    image_name = os.path.join(theme_name, f'{theme_name}.jpg')
+    n_segments = int(input('How many piecewise smooth curves are there?\n'))
     locator.convert_to_grayscale(image_name, n_copies=n_segments)
-    points_per_curve = input('Please mark each gray scale image, then enter the number of dots separated by comma:\n')
-    points_per_curve = [int(x.strip()) for x in points_per_curve.split(',')]
-    locator.parameterize(points_per_curve, reversed=reversed)
+    print('Please mark each gray scale image, then update the configs map.')
+
+
+def parameterize_lights(locator, num_marks, reversed):
+    locator.locate_lights(num_marks, reversed=reversed)
+    locator.generate_code()
     locator.render()
 
 
 if __name__ == '__main__':
-    # Step 0. take a photo of your light when the lights are on and save it.
-    # Step 1. uncomment and run the following line to convert the photo to grayscale
-    # convert_to_grayscale('imgs/blue_heart.jpg', 'imgs/gray.jpg')
-    # Step 2. after manually mark the LEDs with green dots, for example, using Windows' paint, uncomment and run
-    # the following line to extract your marks into a black and white image
-    # extract_marks('imgs/gray.jpg', 'imgs/marks.jpg')
-    # Step 3. run the following command and paste the output to the Arduino IDE.
-    process_image(image_name='halloween.jpg', n_segments=4, reversed=False)
+    """
+    How to generate code for the heart light:
+    Step 0. shape your LED lights (WS2812B, WS2813, etc.), power on and take a photo
+    Step 1. save the photo to ./heart/heart.jpg under this directory
+    Step 2. determine how many piecewise smooth components do you need to parameterize the curve,
+            in this case 2: left half and right half.
+    Step 3. run the script and follow the prompt to manually mark the LEDs on the gray scale images
+         3.1. for each piecewise smooth curve, mark the first point RED and the rest GREEN
+         3.2. count how many marks (RED + GREEN) on each curve (left: 31, right: 29)
+         3.3. after marking all the points, update the configs map below
+    Step 4. code is generated to ../examples/heart/heart.ino
+    """
+    theme_name = 'heart'
+    configs = {'jack_o_lantern': {'num_marks': (34, 57, 26, 3), 'reversed': False},
+               'heart': {'num_marks': (31, 29), 'reversed': False},
+               'figure_three': {'num_marks': (25, 35), 'reversed': True}}
+    locator = LEDLocator(theme=theme_name)
+    if theme_name not in configs:
+        mark_lights(locator, theme_name)
+    else:
+        n_segments = len(configs[theme_name]['num_marks'])
+        locator.convert_to_grayscale(n_copies=n_segments)
+    if theme_name in configs:
+        parameterize_lights(locator, **configs[theme_name])

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 class CRGB;
 namespace LEDGeometry {
@@ -15,7 +16,7 @@ class LEDCurve {
     uint8_t n_blackouts;
     LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
              bool folded);
-    void set_blackout(int8_t n_blackouts, int8_t* blackout);
+    void set_blackout(uint8_t n_blackouts, uint8_t* blackout);
     // Pass control to the light effect.
     void set_effect(LightEffect* effect, int fps, int n_seconds);
 
