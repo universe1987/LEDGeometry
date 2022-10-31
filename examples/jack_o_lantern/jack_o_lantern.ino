@@ -1,3 +1,4 @@
+#include "BlinkEffect.h"
 #include "ColorScheduler.h"
 #include "CustomShape.h"
 #include "FlameEffect.h"
@@ -46,6 +47,7 @@ PulseEffect pulse;
 FlameEffect flame(byte_buffer, RESOLUTION + 8, byte_buffer + RESOLUTION + 8);
 WaveEffect ripple(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
 WaveEffect tide(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
+BlinkEffect bblink;
 
 void setup() {
   delay(3000); // sanity delay
@@ -61,9 +63,8 @@ void loop() {
   color_scheduler.set_cycle(100);
   color_scheduler.set_continuous_mode();
   my_light.set_effect((LightEffect*)&mono, 10, duration);
-  // 2. Ripple effect 20fps for 30s, center is randomly chosen.
-  radial_projection((Shape*)&pumpkin_shape, byte_buffer, COLOR_BUFFER_SIZE);
-  my_light.set_effect((LightEffect*)&ripple, 20, duration);
+  // 2. Blink effect 40fps for 30s, center is randomly chosen.
+  my_light.set_effect((BlinkEffect*)&bblink, 20, duration);
   // 3. Pulse effect 16fps for 30s.
   color_scheduler.set_cycle(120);
   my_light.set_effect((LightEffect*)&pulse, 16, duration);

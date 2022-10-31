@@ -86,6 +86,26 @@ class LEDLocator:
             prev_x, prev_y = x, y
         for x, y in zip(x_coords, y_coords):
             cv2.circle(img, (x, y), 5, (0, 0, 255), -1)
+        mouth = list(range(0, 73))
+        left_eye = list(range(78, 95))
+        nose = list(range(97, 105))
+        right_eye = list(range(107, 119))
+        for part in [mouth, left_eye, nose, right_eye]:
+            xx = self.coordinates[:, 0]
+            yy = self.coordinates[:, 1]
+            x_min = min(xx[i] for i in part)
+            x_max = max(xx[i] for i in part)
+            x_mid = (x_min + x_max) / 2
+            y_min = min(yy[i] for i in part)
+            y_max = max(yy[i] for i in part)
+            y_mid = (y_min + y_max) / 2
+            rx = (x_max - x_min) / 2
+            ry = (y_max - y_min) / 2
+            x_mid = int(round(x_mid * 10000))
+            y_mid = int(round(y_mid * 10000))
+            rx = int(round(rx * 10000))
+            ry = int(round(ry * 10000))
+            print(x_mid, y_mid, rx, ry)
         cv2.imshow('image', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -136,7 +156,7 @@ if __name__ == '__main__':
          3.3. after marking all the points, update the configs map below
     Step 4. code is generated to ../examples/heart/heart.ino
     """
-    theme_name = 'heart'
+    theme_name = 'jack_o_lantern'
     configs = {'jack_o_lantern': {'num_marks': (34, 57, 26, 3), 'reversed': False},
                'heart': {'num_marks': (31, 29), 'reversed': False},
                'figure_three': {'num_marks': (25, 35), 'reversed': True}}
