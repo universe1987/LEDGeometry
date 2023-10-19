@@ -58,6 +58,7 @@ class LEDLocator:
             if os.path.exists(dst_path):
                 print('file {} already exists, will not overwrite'.format(dst_path))
             else:
+                print(dst_path)
                 cv2.imwrite(dst_path, img)
             self.grayscale_images.append(dst_path)
 
@@ -130,10 +131,9 @@ class LEDLocator:
             fp.write(content)
 
 
-def mark_lights(locator, theme_name):
-    image_name = os.path.join(theme_name, f'{theme_name}.jpg')
+def mark_lights(locator):
     n_segments = int(input('How many piecewise smooth curves are there?\n'))
-    locator.convert_to_grayscale(image_name, n_copies=n_segments)
+    locator.convert_to_grayscale(n_copies=n_segments)
     print('Please mark each gray scale image, then update the configs map.')
 
 
@@ -156,13 +156,14 @@ if __name__ == '__main__':
          3.3. after marking all the points, update the configs map below
     Step 4. code is generated to ../examples/heart/heart.ino
     """
-    theme_name = 'jack_o_lantern'
+    theme_name = 'ghost'
     configs = {'jack_o_lantern': {'num_marks': (34, 57, 26, 3), 'reversed': False},
                'heart': {'num_marks': (31, 29), 'reversed': False},
-               'figure_three': {'num_marks': (25, 35), 'reversed': True}}
+               'figure_three': {'num_marks': (25, 35), 'reversed': True},
+               'ghost': {'num_marks': (96, 24), 'reversed': False}}
     locator = LEDLocator(theme=theme_name)
     if theme_name not in configs:
-        mark_lights(locator, theme_name)
+        mark_lights(locator)
     else:
         n_segments = len(configs[theme_name]['num_marks'])
         locator.convert_to_grayscale(n_copies=n_segments)
