@@ -1,10 +1,9 @@
 #include "FlameEffect.h"
 
-#include <FastLED.h>
-
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
 #include "Shape.h"
+#include "Type.h"
 
 namespace LEDGeometry {
 FlameEffect::FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection,
@@ -25,7 +24,7 @@ FlameEffect::FlameEffect(uint8_t* heat, uint8_t resolution, uint8_t* projection)
                   (uint8_t)((550 / resolution) + 2), 120) {}
 
 void FlameEffect::set_random_haunt_mode() {
-    set_haunt_mode((uint8_t) (random8() % 2 + 1));
+    set_haunt_mode((uint8_t)(random8() % 2 + 1));
 }
 
 void FlameEffect::update_heat() {
@@ -53,9 +52,11 @@ void FlameEffect::update(LEDCurve* led_curve) {
     }
     if (progress >= 80) {
         if (haunt_mode == 1) {
-            palette = CRGBPalette16( CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
+            palette =
+                CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
         } else if (haunt_mode == 2) {
-            palette = CRGBPalette16( CRGB::Black, CRGB::Green, CRGB::Lime, CRGB::White);
+            palette = CRGBPalette16(CRGB::Black, CRGB::Green, CRGB::Lime,
+                                    CRGB::White);
         }
     }
     for (int i = 0; i < led_curve->shape->n_points(); i++) {
