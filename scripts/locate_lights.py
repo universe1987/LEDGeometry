@@ -156,11 +156,12 @@ if __name__ == '__main__':
          3.3. after marking all the points, update the configs map below
     Step 4. code is generated to ../examples/heart/heart.ino
     """
-    theme_name = 'ghost'
+    theme_name = 'ghost2'
     configs = {'jack_o_lantern': {'num_marks': (34, 57, 26, 3), 'reversed': False},
                'heart': {'num_marks': (31, 29), 'reversed': False},
                'figure_three': {'num_marks': (25, 35), 'reversed': True},
-               'ghost': {'num_marks': (96, 24), 'reversed': False}}
+               'ghost': {'num_marks': (96, 24), 'reversed': False},
+               'ghost2': {'num_marks': (120,), 'reversed': False}}
     locator = LEDLocator(theme=theme_name)
     if theme_name not in configs:
         mark_lights(locator)
