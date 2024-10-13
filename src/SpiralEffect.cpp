@@ -1,8 +1,9 @@
 #include "SpiralEffect.h"
 
+#include <FastLED.h>
+
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
-#include "Type.h"
 
 namespace LEDGeometry {
 SpiralEffect::SpiralEffect(uint8_t n_segments, uint8_t segment_length)

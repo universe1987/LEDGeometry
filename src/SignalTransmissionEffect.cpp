@@ -1,9 +1,10 @@
 #include "SignalTransmissionEffect.h"
 
+#include <FastLED.h>
+
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
 #include "Shape.h"
-#include "Type.h"
 
 namespace LEDGeometry {
 SignalTransmissionEffect::SignalTransmissionEffect(uint8_t fade_factor)

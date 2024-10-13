@@ -1,11 +1,11 @@
 #include "LEDCurve.h"
 
+#include <FastLED.h>
 #include <stdint.h>
 
 #include "ColorScheduler.h"
 #include "LightEffect.h"
 #include "Shape.h"
-#include "Type.h"
 
 namespace LEDGeometry {
 LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,

@@ -1,11 +1,11 @@
 #include "MonoColorEffect.h"
 
+#include <FastLED.h>
 #include <stdint.h>
 
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
 #include "Shape.h"
-#include "Type.h"
 
 namespace LEDGeometry {
 void MonoColorEffect::update(LEDCurve* led_curve) {

@@ -1,9 +1,10 @@
 #include "BlinkEffect.h"
 
+#include <FastLED.h>
+
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
 #include "Shape.h"
-#include "Type.h"
 
 namespace LEDGeometry {
 
