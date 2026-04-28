@@ -3,7 +3,7 @@
 
 #include "LightEffect.h"
 
-class CRGB;
+struct CRGB;
 
 namespace LEDGeometry {
 class LEDCurve;

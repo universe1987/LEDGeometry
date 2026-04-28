@@ -6,7 +6,7 @@
 
 namespace LEDGeometry {
 SpiralEffect::SpiralEffect(uint8_t n_segments, uint8_t segment_length)
-    : pos(0), n_segments(n_segments), segment_length(segment_length) {}
+    : n_segments(n_segments), segment_length(segment_length), pos(0) {}
 
 void SpiralEffect::update(LEDCurve* led_curve) {
     CRGB color = led_curve->color_scheduler->next_color();

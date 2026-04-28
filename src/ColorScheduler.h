@@ -6,7 +6,7 @@
 namespace LEDGeometry {
 /**
  * Manages the flow of color, it returns a new color each time next_color() is
- * called. ColorScheduler works in two modes: continusous and discrete.
+ * called. ColorScheduler works in two modes: continuous and discrete.
  *
  * [Continuous mode] within each cycle, current_color changes from start_color
  * to end_color with constant speed, use continuous mode for gradually changing
@@ -37,7 +37,7 @@ class ColorScheduler {
     // next cycle starts.
     void set_discrete_mode();
     // In continuous mode, next_color() returns a color interpolated between
-    // start_color and end_color, so that the transi
+    // start_color and end_color, so that colors transition smoothly over time.
     void set_continuous_mode();
     void set_hue_deltas(uint8_t min_value, uint8_t max_value);
 

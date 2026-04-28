@@ -13,9 +13,9 @@ LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
     : leds(leds),
       shape(shape),
       color_scheduler(color_scheduler),
-      folded(folded),
       blackout(nullptr),
       n_blackouts(0),
+      folded(folded),
       frame_index(0){};
 
 void LEDCurve::set_blackout(uint8_t n_blackouts, uint8_t* blackout) {

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-class CRGB;
+struct CRGB;
 namespace LEDGeometry {
 class Shape;
 class ColorScheduler;
