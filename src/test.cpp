@@ -96,7 +96,9 @@ void loop() {
 
 int main() {
     setup();
-    while (true) {
-        loop();
-    }
+#ifdef DEBUG
+    loop();
+#else
+    while (true) { loop(); }
+#endif
 }

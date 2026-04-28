@@ -23,6 +23,7 @@ class LEDCurve {
    private:
     bool folded;
     int frame_index;
+    int effect_index;
     // Handle folded curve and display the assigned color of the LEDs.
     void display(int sleep_ms);
 };

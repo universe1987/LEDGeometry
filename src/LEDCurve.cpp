@@ -16,7 +16,8 @@ LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
       blackout(nullptr),
       n_blackouts(0),
       folded(folded),
-      frame_index(0){};
+      frame_index(0),
+      effect_index(0){};
 
 void LEDCurve::set_blackout(uint8_t n_blackouts, uint8_t* blackout) {
     this->n_blackouts = n_blackouts;
@@ -47,6 +48,18 @@ void LEDCurve::display(int sleep_ms) {
 }
 
 void LEDCurve::set_effect(LightEffect* effect, int fps, int n_seconds) {
+#ifdef DEBUG
+    int n = shape->n_points();
+    std::cout << "Effect " << effect_index << " fps=" << fps << "\n";
+    std::cout << "Coords";
+    for (int i = 0; i < n; i++)
+        std::cout << " " << shape->x(i) << "," << shape->y(i);
+    if (folded)
+        for (int i = n - 1; i >= 0; i--)
+            std::cout << " " << shape->x(i) << "," << shape->y(i);
+    std::cout << "\n";
+    effect_index++;
+#endif
     frame_index = 0;
     int sleep_ms = 1000 / fps;
     int n_iters = n_seconds * fps;
