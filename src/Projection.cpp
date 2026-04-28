@@ -1,9 +1,9 @@
 #include "Projection.h"
 
-#include <FastLED.h>
 #include <math.h>
 
 #include "Shape.h"
+#include "Type.h"
 
 namespace LEDGeometry {
 

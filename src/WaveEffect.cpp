@@ -1,10 +1,9 @@
 #include "WaveEffect.h"
 
-#include <FastLED.h>
-
 #include "ColorScheduler.h"
 #include "LEDCurve.h"
 #include "Shape.h"
+#include "Type.h"
 
 namespace LEDGeometry {
 WaveEffect::WaveEffect(CRGB* spectrum, uint8_t resolution, uint8_t* projection,

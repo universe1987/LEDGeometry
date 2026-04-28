@@ -1,11 +1,11 @@
 #include "LEDCurve.h"
 
-#include <FastLED.h>
 #include <stdint.h>
 
 #include "ColorScheduler.h"
 #include "LightEffect.h"
 #include "Shape.h"
+#include "Type.h"
 
 namespace LEDGeometry {
 LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
@@ -15,7 +15,8 @@ LEDCurve::LEDCurve(CRGB* leds, Shape* shape, ColorScheduler* color_scheduler,
       color_scheduler(color_scheduler),
       folded(folded),
       blackout(nullptr),
-      n_blackouts(0){};
+      n_blackouts(0),
+      frame_index(0){};
 
 void LEDCurve::set_blackout(uint8_t n_blackouts, uint8_t* blackout) {
     this->n_blackouts = n_blackouts;
@@ -30,13 +31,23 @@ void LEDCurve::display(int sleep_ms) {
         }
     }
     for (int i = 0; i < n_blackouts; i++) {
-        leds[i] = CRGB::Black;
+        leds[blackout[i]] = CRGB::Black;
     }
+#ifdef DEBUG
+    int n_leds = folded ? 2 * shape->n_points() : shape->n_points();
+    std::cout << "Frame " << frame_index;
+    for (int i = 0; i < n_leds; i++) {
+        std::cout << " (" << (int)leds[i].r << "," << (int)leds[i].g << "," << (int)leds[i].b << ")";
+    }
+    std::cout << std::endl;
+    frame_index++;
+#endif
     FastLED.show();
     FastLED.delay(sleep_ms);
 }
 
 void LEDCurve::set_effect(LightEffect* effect, int fps, int n_seconds) {
+    frame_index = 0;
     int sleep_ms = 1000 / fps;
     int n_iters = n_seconds * fps;
     for (int i = 0; i < n_iters; i++) {

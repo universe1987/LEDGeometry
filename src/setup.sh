@@ -1,0 +1,1 @@
+g++ -DDEBUG -Wall  -g -std=c++11 -I../../lib8tion test.cpp ColorScheduler.cpp LEDCurve.cpp Projection.cpp Shape.cpp SpiralEffect.cpp FlameEffect.cpp MonoColorEffect.cpp PulseEffect.cpp SignalTransmissionEffect.cpp WaveEffect.cpp -o a.exe
