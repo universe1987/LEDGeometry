@@ -10,6 +10,7 @@ Usage:
     ./a.exe | python ../scripts/visualize.py --output preview.html
 """
 
+import atexit
 import re
 import sys
 import json
@@ -78,9 +79,9 @@ canvas{display:block}
 <div id="controls">
   <button id="play">&#9654;</button>
   <input id="scrub" type="range" min="0" value="0">
-  <button class="sp on" data-s="0.5">0.5&#215;</button>
-  <button class="sp" data-s="1">1&#215;</button>
-  <button class="sp on" data-s="2">2&#215;</button>
+  <button class="sp" data-s="0.5">0.5&#215;</button>
+  <button class="sp on" data-s="1">1&#215;</button>
+  <button class="sp" data-s="2">2&#215;</button>
   <button class="sp" data-s="4">4&#215;</button>
   <button id="loop" class="on">&#8635; Loop</button>
   <span id="ctr">0 / 0</span>
@@ -187,7 +188,7 @@ requestAnimationFrame(tick);
 
 
 def generate_html(effects):
-    return HTML_TEMPLATE.replace('__LEDGEOMETRY_DATA__', json.dumps(effects))
+    return HTML_TEMPLATE.replace('__LEDGEOMETRY_DATA__', json.dumps(effects), 1)
 
 
 def main():
@@ -208,6 +209,7 @@ def main():
     else:
         fd, path = tempfile.mkstemp(suffix='.html', prefix='led_preview_')
         os.close(fd)
+        atexit.register(os.unlink, path)
 
     with open(path, 'w') as f:
         f.write(html)
