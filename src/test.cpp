@@ -26,6 +26,7 @@ using namespace LEDGeometry;
  */
 CRGB leds[NUM_LEDS];
 CRGB color_buffer[COLOR_BUFFER_SIZE];
+CRGB tide_color_buffer[COLOR_BUFFER_SIZE];
 uint8_t byte_buffer[RESOLUTION + NUM_LEDS + 8];
 
 int16_t x_coords[120] = {
@@ -64,7 +65,7 @@ SignalTransmissionEffect transmission;
 PulseEffect pulse;
 FlameEffect flame(byte_buffer, RESOLUTION + 8, byte_buffer + RESOLUTION + 8);
 WaveEffect ripple(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
-WaveEffect tide(color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
+WaveEffect tide(tide_color_buffer, COLOR_BUFFER_SIZE, byte_buffer, 8);
 
 void setup() {
     FastLED.delay(3000);  // sanity delay

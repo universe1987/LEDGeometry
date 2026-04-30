@@ -9,6 +9,7 @@ ColorScheduler::ColorScheduler(uint16_t cycle, uint8_t hue,
       hue(hue),
       min_hue_delta(min_hue_delta),
       max_hue_delta(max_hue_delta),
+      progress(0),
       discrete_mode(false) {
     end_color.setHue(hue);
     change_theme();
@@ -24,7 +25,7 @@ void ColorScheduler::set_cycle(uint16_t new_cycle) {
 }
 
 uint8_t ColorScheduler::get_progress() const {
-    return (uint8_t)(progress * 255 / cycle);
+    return (uint8_t)((uint32_t)progress * 255 / cycle);
 }
 
 void ColorScheduler::change_theme() {
@@ -37,7 +38,7 @@ CRGB ColorScheduler::next_color() {
     if (discrete_mode) {
         current_color = start_color;
     } else {
-        uint8_t frac = (uint8_t)(255 * progress / cycle);
+        uint8_t frac = (uint8_t)((uint32_t)255 * progress / cycle);
         current_color = blend(start_color, end_color, frac);
     }
     ++progress;

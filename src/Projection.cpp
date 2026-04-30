@@ -52,5 +52,8 @@ void intrinsic_projection(Shape* shape, uint8_t* projection,
         projection[i] = resolution - half + i;
         projection[2 * half - i - 1] = resolution - half + i;
     }
+    if (shape->n_points() % 2 == 1) {
+        projection[half] = resolution - 1;
+    }
 }
 }  // namespace LEDGeometry

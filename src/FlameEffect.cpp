@@ -46,10 +46,7 @@ void FlameEffect::update_heat() {
 
 void FlameEffect::update(LEDCurve* led_curve) {
     CRGBPalette16 palette = HeatColors_p;
-    int progress = led_curve->color_scheduler->get_progress();
-    if (progress < 0) {
-        progress += 256;
-    }
+    uint8_t progress = led_curve->color_scheduler->get_progress();
     if (progress >= 80) {
         if (haunt_mode == 1) {
             palette =
