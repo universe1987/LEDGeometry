@@ -89,9 +89,23 @@ struct CRGB {
 };
 
 struct CRGBPalette16 {
-    CRGB color;
-    CRGBPalette16() : color(CRGB::Black) {}
-    CRGBPalette16(CRGB a, CRGB b, CRGB c, CRGB d) : color(a) {}
+    CRGB entries[16];
+    CRGBPalette16() {
+        for (int i = 0; i < 16; i++) entries[i] = CRGB(0, 0, 0);
+    }
+    // Interpolates 4 anchor colours across 16 slots (anchors at 0, 5, 10, 15).
+    CRGBPalette16(CRGB c1, CRGB c2, CRGB c3, CRGB c4) {
+        const CRGB stops[4] = {c1, c2, c3, c4};
+        for (int i = 0; i < 16; i++) {
+            int seg = i < 5 ? 0 : i < 10 ? 1 : 2;
+            int t = i - seg * 5;
+            entries[i] = CRGB(
+                (uint8_t)((int)stops[seg].r + ((int)stops[seg+1].r - (int)stops[seg].r) * t / 5),
+                (uint8_t)((int)stops[seg].g + ((int)stops[seg+1].g - (int)stops[seg].g) * t / 5),
+                (uint8_t)((int)stops[seg].b + ((int)stops[seg+1].b - (int)stops[seg].b) * t / 5)
+            );
+        }
+    }
 };
 
 struct FastLEDType {
@@ -129,5 +143,5 @@ inline CRGB blend(const CRGB& p1, const CRGB& p2, uint8_t amountOfP2) {
 }
 
 inline CRGB ColorFromPalette(const CRGBPalette16& pal, uint8_t index) {
-    return pal.color;
+    return pal.entries[index >> 4];
 }
