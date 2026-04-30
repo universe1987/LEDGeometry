@@ -10,7 +10,6 @@ Usage:
     ./a.exe | python ../scripts/visualize.py --output preview.html
 """
 
-import atexit
 import re
 import sys
 import json
@@ -209,7 +208,6 @@ def main():
     else:
         fd, path = tempfile.mkstemp(suffix='.html', prefix='led_preview_')
         os.close(fd)
-        atexit.register(os.unlink, path)
 
     with open(path, 'w') as f:
         f.write(html)
