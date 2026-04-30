@@ -137,7 +137,7 @@ function draw() {
     const [rv, gv, bv] = frame[i];
     ctx.fillStyle = 'rgb(' + rv + ',' + gv + ',' + bv + ')';
     ctx.beginPath();
-    ctx.arc(cx + x * scale, cy - y * scale, r, 0, 6.2832);
+    ctx.arc(cx + x * scale, cy + y * scale, r, 0, 6.2832);
     ctx.fill();
   }
   ctr.textContent = S.fi + ' / ' + (eff.frames.length - 1);
