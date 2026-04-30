@@ -57,21 +57,68 @@ To reproduce the above effects, follow these steps.
    3. Copy the generated coordinate arrays into your `.ino` sketch.
    4. Upload the updated sketch to your Arduino Nano.
 
-## Debug mode (desktop simulation)
-The library can be compiled and run on a desktop machine to preview effects without hardware.
+## Debug mode (desktop preview)
+
+The library can be compiled and run on a desktop to preview effects without hardware.
 
 **Requirements:** a C++11 compiler and the `lib8tion` library in a sibling directory (`../lib8tion`).
 
+### Build and run
+
 ```bash
 cd src
-bash setup.sh   # compiles test.cpp with -DDEBUG into a.exe
-./a.exe         # prints one line per frame to stdout
+bash setup.sh                                # compile test.cpp with -DDEBUG → a.exe
+./a.exe | python ../scripts/visualize.py     # open animated preview in browser
 ```
 
-Each line has the format:
-```
-Frame N (r,g,b) (r,g,b) ... (r,g,b)
-```
-where `N` is the zero-based frame index within the current effect, and each `(r,g,b)` is the RGB color of one LED after folding and blackout are applied.
+The binary runs one full `loop()` pass and exits. `visualize.py` reads its output, writes a self-contained HTML file, and opens it in your default browser.
 
-To use debug mode in your own file, compile with `-DDEBUG` and include the same headers as `src/test.cpp`. No hardware or Arduino IDE is required.
+### Browser viewer
+
+<img src="./docs/preview.gif" width="400"/>
+
+The viewer shows all effects in tabs with full playback controls:
+
+| Control | Behaviour |
+|---|---|
+| Effect tabs | Switch effect; playback resets to frame 0 |
+| ▶ / ⏸ | Play / pause |
+| Scrub bar | Jump to any frame |
+| 0.5× 1× 2× 4× | Playback speed |
+| ↻ Loop | Toggle looping |
+| Frame counter | Current / total frames |
+
+Custom output path:
+
+```bash
+./a.exe | python ../scripts/visualize.py --output /path/to/preview.html
+```
+
+### Generate an animated GIF
+
+```bash
+./a.exe | python ../scripts/make_gif.py                            # all effects → docs/preview.gif
+./a.exe | python ../scripts/make_gif.py --effects 1 4              # ripple + flame only
+./a.exe | python ../scripts/make_gif.py --output out.gif --max-frames 60 --size 600
+```
+
+Requires [Pillow](https://pillow.readthedocs.io/) (`pip install Pillow`).
+
+### Debug output format
+
+```
+Effect 0 fps=10
+Coords x0,y0 x1,y1 ... xN,yN
+Frame 0 (r,g,b) (r,g,b) ... (r,g,b)
+Frame 1 (r,g,b) ...
+...
+Effect 1 fps=20
+Coords ...
+Frame 0 ...
+```
+
+- **`Effect N fps=F`** — start of a new effect; `N` is zero-based, `F` is the frame rate.
+- **`Coords x,y ...`** — one normalised `float,float` pair per LED in index order. For folded curves the mirrored second half is included.
+- **`Frame N (r,g,b)...`** — one RGB tuple per LED for frame `N`.
+
+To use debug mode in your own sketch, compile with `-DDEBUG` and include the same headers as `src/test.cpp`. No hardware or Arduino IDE is required.
