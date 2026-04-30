@@ -66,9 +66,9 @@ The library can be compiled and run on a desktop to preview effects without hard
 ### Build and run
 
 ```bash
-cd src
-bash setup.sh                                # compile test.cpp with -DDEBUG → a.exe
-./a.exe | python ../scripts/visualize.py     # open animated preview in browser
+cd extras/debug
+bash setup.sh                                    # compile with -DDEBUG → a.exe
+./a.exe | python ../../scripts/visualize.py      # open animated preview in browser
 ```
 
 The binary runs one full `loop()` pass and exits. `visualize.py` reads its output, writes a self-contained HTML file, and opens it in your default browser.
@@ -91,15 +91,15 @@ The viewer shows all effects in tabs with full playback controls:
 Custom output path:
 
 ```bash
-./a.exe | python ../scripts/visualize.py --output /path/to/preview.html
+./a.exe | python ../../scripts/visualize.py --output /path/to/preview.html
 ```
 
 ### Generate an animated GIF
 
 ```bash
-./a.exe | python ../scripts/make_gif.py                            # all effects → docs/preview.gif
-./a.exe | python ../scripts/make_gif.py --effects 1 4              # ripple + flame only
-./a.exe | python ../scripts/make_gif.py --output out.gif --max-frames 60 --size 600
+./a.exe | python ../../scripts/make_gif.py                            # all effects → docs/preview.gif
+./a.exe | python ../../scripts/make_gif.py --effects 1 4              # ripple + flame only
+./a.exe | python ../../scripts/make_gif.py --output out.gif --max-frames 60 --size 600
 ```
 
 Requires [Pillow](https://pillow.readthedocs.io/) (`pip install Pillow`).
@@ -121,4 +121,4 @@ Frame 0 ...
 - **`Coords x,y ...`** — one normalised `float,float` pair per LED in index order. For folded curves the mirrored second half is included.
 - **`Frame N (r,g,b)...`** — one RGB tuple per LED for frame `N`.
 
-To use debug mode in your own sketch, compile with `-DDEBUG` and include the same headers as `src/test.cpp`. No hardware or Arduino IDE is required.
+To use debug mode in your own sketch, compile with `-DDEBUG` and include the same headers as `extras/debug/test.cpp`. No hardware or Arduino IDE is required.
